@@ -8,7 +8,6 @@ import re
 class ROMMON(CommonRunner):
     def __init__(self, crt, current_tab):
         CommonRunner.__init__(self, crt, current_tab)
-        self.rommon_prompts = ['loader >', 'loader>', 'switch:', '>', '?']
         # Regex catches the following prompts: 'loader >', 'loader>', 'switch:', 'rommon # >', '>', '?'
         # (test on https://regex101.com/)
         self.prompt_regex = re.compile(r'^.*>|^.*\?|switch:')

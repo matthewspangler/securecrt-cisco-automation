@@ -33,6 +33,7 @@ class CiscoRunner(CommonRunner):
         self.mode_prompt = None
         # Discovers prompts with '#' or '>' on Cisco devices.
         self.prompt_regex = re.compile(r'^.*#|^.*>')
+        self.rommon_prompts = ['loader >', 'loader>', 'switch:', '>', '?']
         self.prompt = None
         self.set_prompt()
         self.line_matches = ["\r\n", '\r', '\n', '--More--']
@@ -110,9 +111,6 @@ class CiscoRunner(CommonRunner):
         :return: the shell output of the command sent to self.current_tab
         """
 
-        timeout = self.response_timeout
-        skip_exceptions = self.skip_exceptions
-
         # RegEx to match the whitespace and backspace commands after --More-- prompt
         exp_more = r' [\b]+[ ]+[\b]+(?P<line>.*)'
         re_more = re.compile(exp_more)
@@ -131,7 +129,7 @@ class CiscoRunner(CommonRunner):
             # write that line to the file.  If we get our prompt back (which won't have CRLF), break the loop b/c we
             # found the end of the output.
             while True:
-                nextline = self.current_tab.Screen.ReadString(line_matches, timeout)
+                nextline = self.current_tab.Screen.ReadString(line_matches, self.response_timeout)
                 # If the match was the 1st index in the endings list -> \r\n
                 if self.current_tab.Screen.MatchIndex == 0:
                     logger.debug("MatchIndex is 0. Timeout trying to capture input.")
@@ -159,7 +157,8 @@ class CiscoRunner(CommonRunner):
                     logger.debug("MatchIndex is less than or equal to 4. Append newline to output list.")
                 elif self.current_tab.Screen.MatchIndex > 4:
                     # If we get a --More-- send a space character
-                    self.__send(" ")
+                    # TODO: make crt API wrapper and replace this send command:
+                    self.current_tab.Screen.Send(" ")
                     logger.debug("MatchIndex is greater than 4. Usually this means we encountered a 'More' prompt.")
                 else:
                     if self.skip_exceptions is False:
@@ -304,9 +303,9 @@ class CiscoRunner(CommonRunner):
         sh_run_output = self.get_command_output("show running-config")
         parse = CiscoConfParse(sh_run_output)
         for intf_obj in parse.find_objects('^interface'):
-            intf_names.append(intf_obj.text)
-        # Remove the word "interface" from the names:
-        intf_names = crt_automation.utilities.intf_regex('\n'.join(intf_names))
+            # Remove the word "interface" from the names:
+            intf_names.append(intf_obj.text.split("interface ")[1])
+        logging.debug("Interface list: {}.".format(str(", ".join(intf_names))))
         return intf_names
 
     def set_interfaces(self):

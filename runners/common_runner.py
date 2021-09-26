@@ -108,7 +108,7 @@ class CommonRunner:
 
     # TODO: write equivalent of send() and send_wait_for_strings() for this class - or for the Bash class.
 
-    def __send(self, command):
+    def crt_send(self, command):
         """
         Most basic send command, doesn't wait for output, simply logs the action.
         Basically wraps Send() function from SecureCRT API.
@@ -127,7 +127,7 @@ class CommonRunner:
         This function also doesn't have to wait for output like get_command_output() does,
         making it useful for IOS commands that have no output.
         This function either waits for wait_for or the command itself if no wait_for string is provided.
-        This function does not work for sending masked passwords, use __send() instead.
+        This function does not work for sending masked passwords, use crt_send() instead.
         :param command: the command to send to self.current_tab
         :param wait_for: string to wait for in session output before continuing
         :return:
@@ -139,7 +139,7 @@ class CommonRunner:
             wait_for = command.strip()
             logger.debug("wait_for is '{}'".format(wait_for))
         if self.is_connected():
-            self.__send(command)
+            self.crt_send(command)
             result = self.current_tab.Screen.WaitForString(wait_for, timeout)
             if not result:
                 if self.skip_exceptions is False:
@@ -164,7 +164,7 @@ class CommonRunner:
             timeout = self.response_timeout
 
         if self.is_connected():
-            self.__send(command)
+            self.crt_send(command)
             logger.debug("wait_for_strings are '{}'".format(','.join(wait_for_strings)))
             result = self.current_tab.Screen.WaitForStrings(wait_for_strings, timeout)
             if not result:
@@ -240,7 +240,7 @@ class CommonRunner:
                     logger.debug("MatchIndex is less than or equal to 4. Append newline to output list.")
                 elif self.current_tab.Screen.MatchIndex > 4:
                     # If we get a --More-- send a space character
-                    self.__send(" ")
+                    self.crt_send(" ")
                     logger.debug("MatchIndex is greater than 4. Usually this means we encountered a 'More' prompt.")
                 else:
                     if self.skip_exceptions is False:

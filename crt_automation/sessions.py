@@ -120,6 +120,9 @@ class Session:
         # TODO - don't set this to a Cisco runner, in case we are working with bash.
         self.runner = CiscoRunner(self.crt, tab)
         self.remote_ip = "0.0.0.0"
+        self.enable_pass = ''
+        self.username = ''
+        self.password = ''
         self.hostname = None
         self.tab_name = None
         self.tab_index = None
@@ -195,6 +198,12 @@ class Session:
                                 "This script is not designed to run on {}!".format(self.os))
             return False
 
+    def cisco_login(self):
+        pass
+
+    def cisco_enable_pass(self):
+        pass
+
     def start_linux_session(self):
         """
         Sets self.runner to an instance of the bash class
@@ -204,13 +213,20 @@ class Session:
         self.runner = LinuxRunner(self.crt, self.tab)
         self.runner.set_prompt()
 
-    def start_cisco_session(self):
+    def start_cisco_session(self, enable_pass=None, username=None, password=None):
         """
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
         :return:
         """
         if not self.is_connected():
             raise Exception("Session is not connected.  Cannot start Cisco session.")
+
+        if enable_pass:
+            self.enable_pass = enable_pass
+        if username:
+            self.username = username
+        if password:
+            self.password = password
 
         # Use this runner until we discover the network OS type
         temp_runner = runners.CiscoRunner(self.crt, self.tab)
@@ -223,7 +239,13 @@ class Session:
             if not attempt < 5:
                 break
             temp_runner.send("exit \r")
-            result = temp_runner.current_tab.Screen.WaitForStrings(["RETURN", "to get started"], 1)
+            result = temp_runner.current_tab.Screen.WaitForStrings(["RETURN", "to get started", "login"], 10)
+
+        if result == 3:
+            temp_runner.send("{}\r".format(self.username))
+            temp_runner.send("{}\r".format(self.password))
+
+        # TODO: add enable password option
         temp_runner.send("\r")
         temp_runner.send("en \r")
 
