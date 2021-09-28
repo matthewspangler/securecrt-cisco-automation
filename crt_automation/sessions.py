@@ -218,6 +218,9 @@ class Session:
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
         :return:
         """
+        self.crt.Screen.Synchronous = True
+        self.crt.Screen.IgnoreEscape = True
+
         if not self.is_connected():
             raise Exception("Session is not connected.  Cannot start Cisco session.")
 

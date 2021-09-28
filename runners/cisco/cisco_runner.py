@@ -29,6 +29,8 @@ class CiscoRunner(CommonRunner):
 
     def __init__(self, crt, current_tab):
         CommonRunner.__init__(self, crt, current_tab)
+        self.crt.Screen.Synchronous = True
+        self.crt.Screen.IgnoreEscape = True
         self.mode = None
         self.mode_prompt = None
         self.response_timeout = 5
