@@ -213,7 +213,7 @@ class Session:
         self.runner = LinuxRunner(self.crt, self.tab)
         self.runner.set_prompt()
 
-    def start_cisco_session(self, enable_pass=None, username=None, password=None):
+    def start_cisco_session(self, enable_pass=None, username=None, password=None, timeout=5):
         """
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
         :return:
@@ -231,26 +231,17 @@ class Session:
         # Use this runner until we discover the network OS type
         temp_runner = runners.CiscoRunner(self.crt, self.tab)
 
-        # Get into priv exec mode from any other mode:
-        result = None
-        attempt = 0
-        while not result:
-            attempt += 1
-            if not attempt < 5:
-                break
-            temp_runner.send("exit \r")
-            result = temp_runner.current_tab.Screen.WaitForStrings(["RETURN", "to get started", "login"], 10)
-
-        if result == 3:
-            temp_runner.send("{}\r".format(self.username))
-            temp_runner.send("{}\r".format(self.password))
-
-        # TODO: add enable password option
-        temp_runner.send("\r")
-        temp_runner.send("en \r")
-
         # Discover the prompt so we can parse output
         temp_runner.set_prompt()
+
+        if ">" in temp_runner.prompt:  # enter priv exec from user exec
+            temp_runner.send("en \r")
+            temp_runner.current_tab.Screen.WaitForString("en", timeout)
+            temp_runner.set_prompt()
+        while ")#" in temp_runner.prompt:  # exit configuration modes
+            temp_runner.send("exit\r")
+            temp_runner.current_tab.Screen.WaitForString("exit", timeout)
+            temp_runner.set_prompt()
 
         sh_ver_out = temp_runner.get_command_output("sh ver | i Cisco")
         result = crt_automation.utilities.os_regex(sh_ver_out)

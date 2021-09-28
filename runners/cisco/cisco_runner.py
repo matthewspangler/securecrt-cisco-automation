@@ -31,6 +31,7 @@ class CiscoRunner(CommonRunner):
         CommonRunner.__init__(self, crt, current_tab)
         self.mode = None
         self.mode_prompt = None
+        self.response_timeout = 5
         # Discovers prompts with '#' or '>' on Cisco devices.
         self.prompt_regex = re.compile(r'^.*#|^.*>')
         self.rommon_prompts = ['loader >', 'loader>', 'switch:', '>', '?']
