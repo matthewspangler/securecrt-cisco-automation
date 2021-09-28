@@ -219,7 +219,6 @@ class Session:
         :return:
         """
         self.crt.Screen.Synchronous = True
-        self.crt.Screen.IgnoreEscape = True
 
         if not self.is_connected():
             raise Exception("Session is not connected.  Cannot start Cisco session.")
