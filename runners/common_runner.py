@@ -35,6 +35,7 @@ class CommonRunner:
         self.crt.Synchronous = True
         self.prompt = None
         self.current_tab = current_tab
+        self.host = current_tab.Caption
         self.current_tab.Screen.Synchronous = True
         self.response_timeout = 5
         self.skip_exceptions = True

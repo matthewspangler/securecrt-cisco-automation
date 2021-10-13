@@ -16,6 +16,15 @@ class CrtSession:
         self.sessions = self.get_all_sessions()
         # Sessions loosely represent tabs, although a session can be reassigned to a different tab.
         self.active_session = self.get_active_session()
+        self.initial_tab = self.crt.GetScriptTab()
+
+    def cleanup(self):
+        """
+        Run this at the end of your scripts, to return everything back to how it was before you ran the script.
+        """
+        for session in self.sessions:
+            session.tab.Caption = session.host
+        self.initial_tab.Activate()
 
     def get_active_session(self):
         # TODO: if sessions list is empty...
@@ -117,6 +126,7 @@ class Session:
         self.tab = tab
         self.script = None
         self.os = None
+        self.host = tab.Caption
         # TODO - don't set this to a Cisco runner, in case we are working with bash.
         self.runner = CiscoRunner(self.crt, tab)
         self.remote_ip = "0.0.0.0"
