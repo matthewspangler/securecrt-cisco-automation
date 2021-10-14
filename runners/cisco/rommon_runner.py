@@ -11,6 +11,7 @@ class ROMMON(CommonRunner):
         # Regex catches the following prompts: 'loader >', 'loader>', 'switch:', 'rommon # >', '>', '?'
         # (test on https://regex101.com/)
         self.prompt_regex = re.compile(r'^.*>|^.*\?|switch:')
+        self.rommon_prompts = ['loader >', 'loader>', 'switch:', '>', '?']
         # TODO: make regular expression that looks for any of the ROMMON prompts
         self.line_matches = ["\r\n", '\r', '\n']
 

@@ -19,14 +19,14 @@ else:
 
 # Local import
 import runners.cisco
-
+from crt_automation.sessions import CrtSession
 
 # Main function and script logic here:
 def main():
 
     # TODO: maybe add code to reload if device is found in mode higher than priv exec?
 
-    net_os = runners.cisco.ROMMON(crt)
+    net_os = runners.cisco.ROMMON(crt, crt.GetScriptTab())
     # Reload in case not yet in boot process:
     net_os.crt.Dialog.MessageBox("Please reload the switch from IOS.")
     net_os.current_tab.Screen.WaitForStrings(["Proceed with", "confirm"], 1000)
