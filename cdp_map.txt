@@ -1,26 +1,0 @@
-switch# 
-switch# 
-switch# 
-switch#show cdp neighbors detail----------------------------------------
-Device ID:F340-12-22-SW.cisco.com
-VTP Management Domain Name: CALOnet
-Interface address(es): 1
-    IPv4 Address: 14.0.123.122
-Platform: cisco WS-C2960-48TC-L, Capabilities: Switch IGMP Filtering 
-Interface: mgmt0, Port ID (outgoing port): FastEthernet0/22
-Holdtime: 127 sec
-Version:
-Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 12.2(44)SE6, REL
-EASE SOFTWARE (fc1)
-Copyright (c) 1986-2009 by Cisco Systems, Inc.
-Compiled Mon 09-Mar-09 18:10 by gereddy
-Advertisement Version: 2
-Native VLAN: 10
-Duplex: full
-Mgmt address(es):
-    IPv4 Address: 14.0.123.122
-Local Interface MAC: ac:4a:67:fa:1c:90
-Remote Interface MAC: 00:1e:79:cb:0b:16
-
-[{'LocalIntf': 'mgmt0', 'DeviceID': 'F340-12-22-SW.cisco.com', 'SystemName': '', 'RemoteIntf': 'FastEthernet0/22', 'InterfaceIP': ['14.0.123.122'], 'Platform': 'cisco WS-C2960-48TC-L', 'Version': 'Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 12.2(44)SE6, REL', 'MgmtIP': ['14.0.123.122'], 'MTU': '', 'Capabilities': 'Switch IGMP Filtering '}]
-
