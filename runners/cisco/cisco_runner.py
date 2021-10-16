@@ -27,7 +27,7 @@ class CiscoRunner(CommonRunner):
         this variable is used for parsing shell output to determine if a command was successfully entered
     """
 
-    def __init__(self, crt, current_tab):
+    def __init__(self, crt, current_tab=None):
         CommonRunner.__init__(self, crt, current_tab)
         self.crt.Screen.Synchronous = True
         self.crt.Screen.IgnoreEscape = True

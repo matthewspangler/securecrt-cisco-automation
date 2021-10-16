@@ -47,7 +47,7 @@ class CrtSession:
             self.active_session = session
             self.active_session.focus_tab()
 
-    def __get_script_tab(self):
+    def get_script_tab(self):
         return self.crt.GetScriptTab()
 
     def get_all_sessions(self):

@@ -30,11 +30,14 @@ class CommonRunner:
         Used for the self.send_command function to differentiate user input from command output.
     """
 
-    def __init__(self, crt, current_tab):
+    def __init__(self, crt, current_tab=None):
         self.crt = crt
         self.crt.Synchronous = True
         self.prompt = None
-        self.current_tab = current_tab
+        if current_tab is None:
+            self.crt.GetScriptTab()
+        else:
+            self.current_tab = current_tab
         self.host = current_tab.Caption
         self.current_tab.Screen.Synchronous = True
         self.response_timeout = 5

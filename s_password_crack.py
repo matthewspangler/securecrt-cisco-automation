@@ -25,6 +25,7 @@ from runners.cisco import cisco_runner
 
 # Main function and script logic here:
 def main():
+    scrt = CrtSession(crt)
     runner = cisco_runner.CiscoRunner(crt)
 
     action_delay = 2

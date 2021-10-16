@@ -6,7 +6,7 @@ import re
 
 
 class ROMMON(CommonRunner):
-    def __init__(self, crt, current_tab):
+    def __init__(self, crt, current_tab=None):
         CommonRunner.__init__(self, crt, current_tab)
         # Regex catches the following prompts: 'loader >', 'loader>', 'switch:', 'rommon # >', '>', '?'
         # (test on https://regex101.com/)
