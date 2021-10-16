@@ -28,16 +28,16 @@ class CrtSession:
 
     def get_active_session(self):
         # TODO: if sessions list is empty...
-        active_tab_index = self.get_focused_tab_index()
+        active_tab_index = self.__get_focused_tab_index()
         for session in self.sessions:
             if session.tab_index is active_tab_index:
                 return session
         return None
 
-    def get_focused_tab_index(self):
+    def __get_focused_tab_index(self):
         return self.crt.GetScriptTab().Index
 
-    def get_tab_count(self):
+    def __get_tab_count(self):
         return self.crt.GetTabCount()
 
     def set_active_session(self, session=None):
@@ -46,6 +46,9 @@ class CrtSession:
         else:
             self.active_session = session
             self.active_session.focus_tab()
+
+    def __get_script_tab(self):
+        return self.crt.GetScriptTab()
 
     def get_all_sessions(self):
         session_list = []
@@ -63,7 +66,7 @@ class CrtSession:
         pass
 
     def close_session(self, session):
-        active_tab_index = self.get_focused_tab_index()
+        active_tab_index = self.__get_focused_tab_index()
         i = 0
         for session in self.sessions:
             i += 1
@@ -71,17 +74,32 @@ class CrtSession:
                 session.tab.Close()
                 self.sessions.pop(i)
 
+    def focus_session(self, session):
+        session.tab.Activate()
+        self.active_session = session
+
     def focus_next_session(self):
-        pass
+        focus_index = self.__get_focused_tab_index() + 1
+        for session in self.sessions:
+            if session.tab_index is focus_index:
+                self.focus_session(session)
 
     def focus_previous_session(self):
-        pass
+        focus_index = self.__get_focused_tab_index() + 1
+        for session in self.sessions:
+            if session.tab_index is focus_index:
+                self.focus_session(session)
 
     def focus_session_by_index(self, index):
-        pass
+        session = self.sessions[index + 1]  # assuming count starts from 0
+        self.focus_session(session)
 
     def focus_session_by_tab_label(self, name):
-        pass
+        for n_tab_index in range(1, self.crt.GetTabCount() + 1):
+            tab = self.crt.GetTab(n_tab_index)
+            if tab.Caption == name:
+                return self.get_session_by_index(n_tab_index + 1)  # assuming count starts from 0
+        return None
 
     def get_session_by_index(self, index):
         for session in self.sessions:
