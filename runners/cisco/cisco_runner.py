@@ -41,14 +41,36 @@ class CiscoRunner(CommonRunner):
         self.set_prompt()
         self.line_matches = ["\r\n", '\r', '\n', '--More--']
         self.image_version = None
-        self.device_type = None
+        self.model = None
         self.interfaces = None
         self.model_number = None
         self.config_register = None
         self.hostname = None
+        # These variables save us from running '#sh run' and '#sh ver' multiple times:
+        self.running_config = None
+        self.startup_config = None
+        self.show_version = None
 
     def __str__(self):
         return '<Class: CiscoRunner>'
+
+    def set_running_config(self):
+        self.running_config = self.get_command_output("show running-config")
+
+    def get_model(self):
+        self.model = self.get_output_as_str(
+            "sh inv | i hassis").split(":")[2]
+
+    def check_model(self):
+        pass
+
+    def get_image_version(self):
+        self.image_version = self.get_output_as_str(
+            "sh ver | i Version").split("ersion ")[1].split(",")[0].split("\n")[0]
+        return self.image_version
+
+    def check_image_version(self):
+        pass
 
     def set_prompt(self):
         """
@@ -303,8 +325,9 @@ class CiscoRunner(CommonRunner):
         :return: interface names in a list
         """
         intf_names = []
-        sh_run_output = self.get_command_output("show running-config")
-        parse = CiscoConfParse(sh_run_output)
+        if not self.running_config:
+            self.set_running_config()
+        parse = CiscoConfParse(self.running_config)
         for intf_obj in parse.find_objects('^interface'):
             # Remove the word "interface" from the names:
             intf_names.append(intf_obj.text.split("interface ")[1])
