@@ -2,7 +2,8 @@
 # $interface = "1.0"
 
 import re
-
+import os
+from ftplib import FTP
 
 class CiscoScripts:
     def __init__(self, runner_class_instance):
@@ -90,6 +91,57 @@ class CiscoScripts:
         for match in matches:
             results.append(match.group())
         return results[0].split("/")[0]  # I decided to remove the '/' because it isn't necessary.
+
+    def copy_from_ftp_server(self, session, hostname, username, password, title="Please select an image file", filter="Image files (*.bin)|*.bin||"):
+        runner = session.runner
+        image_full_path = self.session.crt.Dialog.FileOpenDialog(title, filter)
+
+        HOSTNAME = hostname
+        USERNAME = username
+        PASSWORD = password
+
+        # Connect FTP Server
+        ftp_server = FTP(HOSTNAME, USERNAME, PASSWORD)
+
+        # force UTF-8 encoding
+        ftp_server.encoding = "utf-8"
+
+        # Get filename from full path:
+        filename = os.path.basename(image_full_path)
+
+        # Login so we can check what files are already on the ftp server:
+        ftp_server.login(USERNAME, PASSWORD)
+
+        # If file is already on server, delete it:
+        if filename in ftp_server.nlst():
+            ftp_server.delete(filename)
+
+        try:
+            # Read file in binary mode
+            with open(image_full_path, "rb") as file:
+                # Command for Uploading the file "STOR filename"
+                ftp_server.storbinary(f"STOR {filename}", file)
+        except Exception as e:
+            # Print out errors in a message box:
+            self.session.crt.Dialog.MessageBox("Exception message: {}".format(e))
+
+        success = False
+        if filename in ftp_server.nlst():
+            # crt.Dialog.MessageBox("File {} successfully uploaded to FTP server.".format(filename))
+            success = True
+
+        if success is False:
+            raise Exception("Could not find file on FTP server!")
+
+        ftp_server.quit()
+        mgmt_vrf = runner.get_mgmt_vrf()
+
+        if mgmt_vrf is None:
+            self.copy_ftp(HOSTNAME, filename, USERNAME, PASSWORD)
+        else:
+            self.copy_ftp(HOSTNAME, filename, USERNAME, PASSWORD, mgmt_vrf)
+
+        return filename
 
     def copy_ftp(self, runner, hostname, source_filename, username="", password="", vrf=None, destination_dir=None,
                  copy_timeout=1800):
