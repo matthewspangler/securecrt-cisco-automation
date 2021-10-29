@@ -2,7 +2,8 @@
 # $interface = "1.0"
 
 import re
-import os
+import socket
+import struct
 import logging
 import textfsm
 
@@ -209,3 +210,10 @@ def textfsm_parse_to_dict(input_data, template_filename):
 
     logger.debug("Converted all sub-lists to dicts.  Size is {0}".format(len(output)))
     return output
+
+
+def CIDR_to_IP_netmask(CIDR):
+    ip, net_bits = CIDR.split('/')
+    host_bits = 32 - int(net_bits)
+    netmask = socket.inet_ntoa(struct.pack('!I', (1 << 32) - (1 << host_bits)))
+    return ip, netmask

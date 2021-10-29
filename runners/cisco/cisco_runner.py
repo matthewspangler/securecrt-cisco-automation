@@ -3,6 +3,8 @@
 
 from runners.common_runner import CommonRunner
 import crt_automation.utilities
+import socket
+import struct
 import re
 import logging
 from ciscoconfparse import CiscoConfParse
@@ -249,6 +251,8 @@ class CiscoRunner(CommonRunner):
         self.current_tab.Screen.WaitForString(">")
         self.set_prompt()
         self.set_mode()
+        if "User EXEC" in self.mode:
+            logger.info("Entered User EXEC mode.")
 
     def global_config(self):
         """
@@ -269,6 +273,8 @@ class CiscoRunner(CommonRunner):
             self.send("conf t \r")
         self.set_prompt()
         self.set_mode()
+        if "Global Config" in self.mode:
+            logger.info("Entered Global Configuration mode.")
 
     def priv_exec(self):
         """
@@ -292,6 +298,8 @@ class CiscoRunner(CommonRunner):
                     raise Exception("Could not enter Privileged EXEC!")
         self.set_prompt()
         self.set_mode()
+        if "Privileged EXEC" in self.mode:
+            logger.info("Entered Privilege EXEC mode.")
 
     def goto_intf_config(self, interface):
         """
@@ -341,6 +349,22 @@ class CiscoRunner(CommonRunner):
         :return:
         """
         self.interfaces = self.get_intf_names()
+
+    def set_intf_addr(self, ip_address, netmask=None, interface=None):
+        """
+        Sets an address on an interface.
+        :param ip_address: can be an IP, hostname, or CIDR
+        :param netmask: The netmask, not required if CIDR was passed to ip_address
+        :param interface: The interface to set the address on
+        """
+        if interface:
+            self.goto_intf_config(interface)
+        if netmask is None:
+            CIDR = ip_address
+            ip, netmask = crt_automation.utilities.CIDR_to_IP_netmask(CIDR)
+            self.send("ip addr {} {}".format(ip, netmask))
+        else:
+            self.send("ip addr {} {}".format(ip_address, netmask))
 
     def save_changes(self):
         """
