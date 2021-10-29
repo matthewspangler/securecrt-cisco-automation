@@ -3,6 +3,8 @@
 import runners
 import logging
 import os
+import toml
+import time
 from runners.common_runner import CommonRunner
 from runners.cisco.cisco_runner import CiscoRunner
 from runners.nix import LinuxRunner
@@ -237,7 +239,7 @@ class Session:
         self.runner = LinuxRunner(self.crt, self.tab)
         self.runner.set_prompt()
 
-    def start_cisco_session(self, enable_pass=None, username=None, password=None, timeout=5):
+    def start_cisco_session(self, attempt_login=True, enable_pass=None, timeout=5):
         """
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
         :return:
@@ -249,15 +251,47 @@ class Session:
 
         if enable_pass:
             self.enable_pass = enable_pass
-        if username:
-            self.username = username
-        if password:
-            self.password = password
 
         # TODO - code for enable passwords, usernames and passwords
 
         # Use this runner until we discover the network OS type
         temp_runner = runners.CiscoRunner(self.crt, self.tab)
+
+        login_waitfors = ["ogin",
+                          "sername",
+                          "assword",
+                          "incorrect",
+                          "#",
+                          ">"]
+        if attempt_login:
+            login_timeout = 5
+            temp_runner.current_tab.Screen.Send("\r")
+            result = temp_runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
+            max_attempts = 5
+            count = 1
+            while result < 4:
+                if count > max_attempts:
+                    break
+                result = temp_runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
+                time.sleep(1)
+                if result <= 2:
+                    temp_runner.current_tab.Screen.Send("{}\r".format(self.username))
+                    temp_runner.current_tab.Screen.WaitForString(":", 20)
+                    time.sleep(1)
+                    temp_runner.current_tab.Screen.Send("{}\r".format(self.password))
+                    time.sleep(1)
+                elif result == 3:
+                    temp_runner.current_tab.Screen.Send("\r")
+                    temp_runner.current_tab.Screen.Send("{}\r".format(self.password))
+                    time.sleep(1)
+                elif result >= 5:
+                    break
+                elif result == 0:
+                    break
+                count += 1
+
+            if result == 4:  # If password is still incorrect after max attempts reached:
+                raise Exception("Failed to login!")
 
         # Discover the prompt so we can parse output
         temp_runner.set_prompt()
