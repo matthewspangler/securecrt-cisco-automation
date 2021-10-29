@@ -61,6 +61,9 @@ class CiscoRunner(CommonRunner):
         self.model = self.get_output_as_str(
             "sh inv | i hassis").split(":")[2]
 
+    def get_boot_vars(self):
+        pass
+
     def check_model(self):
         pass
 
@@ -130,9 +133,6 @@ class CiscoRunner(CommonRunner):
         Use send(command + "\r") instead for commands with no output. Consider changing self.response_timeout
         for commands that take a long time to output.
         :param command: the command to send to self.current_tab
-        :param skip_exceptions: skips exceptions so that common_tasks are not paused until you close the message box
-        :type skip_exceptions: bool
-        :param timeout: time in seconds to wait for command output
         :return: the shell output of the command sent to self.current_tab
         """
 
@@ -238,6 +238,7 @@ class CiscoRunner(CommonRunner):
         :return:
         """
         # TODO: make more efficient
+        # TODO: current state of function gets stuck on enable passwords
         self.set_prompt()
         self.priv_exec()
         self.current_tab.Screen.Send("end \r")

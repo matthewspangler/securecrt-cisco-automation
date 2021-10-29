@@ -43,7 +43,6 @@ To setup dependencies, navigate to the project's root directory and run ```pip i
 
 Multi-tab:
 - m_template.py - example script showing off features of this library
-- m_run_script_all_tabs.py - Runs a selected script on all tabs with an active connection
 - m_cdp_map.py - Enables CDP and parses the output of #sh cdp neigh detail
 
 Single-tab:

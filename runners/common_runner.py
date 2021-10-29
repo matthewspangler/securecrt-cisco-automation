@@ -83,7 +83,6 @@ class CommonRunner:
 
         logger.debug("<GET PROMPT> Discovered prompt as '{0}'.".format(prompt))
 
-        self.current_tab.Caption = prompt
         self.prompt = prompt
         logger.debug("self.prompt set to '{}'".format(self.prompt))
         return prompt

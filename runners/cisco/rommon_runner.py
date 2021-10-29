@@ -26,6 +26,4 @@ class ROMMON(CommonRunner):
         except AttributeError:
             prompt = 'UNKNOWN'
 
-        self.current_tab.Caption = prompt
-
         self.prompt = prompt

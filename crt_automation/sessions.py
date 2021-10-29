@@ -15,18 +15,13 @@ class CrtSession:
         self.crt = crt
         self.sessions = self.get_all_sessions()
         # Sessions loosely represent tabs, although a session can be reassigned to a different tab.
-        self.active_session = self.get_active_session()
+        self.active_session = self.get_active_sessions()
         self.initial_tab = self.crt.GetScriptTab()
 
     def cleanup(self):
-        """
-        Run this at the end of your scripts, to return everything back to how it was before you ran the script.
-        """
-        for session in self.sessions:
-            session.tab.Caption = session.host
-        self.initial_tab.Activate()
+        pass
 
-    def get_active_session(self):
+    def get_active_sessions(self):
         # TODO: if sessions list is empty...
         active_tab_index = self.__get_focused_tab_index()
         for session in self.sessions:
@@ -42,7 +37,7 @@ class CrtSession:
 
     def set_active_session(self, session=None):
         if not session:
-            self.active_session = self.get_active_session()
+            self.active_session = self.get_active_sessions()
         else:
             self.active_session = session
             self.active_session.focus_tab()
@@ -230,6 +225,7 @@ class Session:
         pass
 
     def cisco_enable_pass(self):
+        # TODO
         pass
 
     def start_linux_session(self):
@@ -257,6 +253,8 @@ class Session:
             self.username = username
         if password:
             self.password = password
+
+        # TODO - code for enable passwords, usernames and passwords
 
         # Use this runner until we discover the network OS type
         temp_runner = runners.CiscoRunner(self.crt, self.tab)

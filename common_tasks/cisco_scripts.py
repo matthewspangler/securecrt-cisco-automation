@@ -92,8 +92,8 @@ class CiscoScripts:
             results.append(match.group())
         return results[0].split("/")[0]  # I decided to remove the '/' because it isn't necessary.
 
-    def copy_from_ftp_server(self, session, hostname, username, password, title="Please select an image file", filter="Image files (*.bin)|*.bin||"):
-        runner = session.runner
+    def copy_from_ftp_server(self, hostname, username, password, title="Please select an image file", filter="Image files (*.bin)|*.bin||"):
+        runner = self.session.runner
         image_full_path = self.session.crt.Dialog.FileOpenDialog(title, filter)
 
         HOSTNAME = hostname
