@@ -16,7 +16,7 @@ class CrtSession:
     def __init__(self, crt):
         self.crt = crt
         self.sessions = self.get_all_sessions()
-        # Sessions loosely represent tabs, although a session can be reassigned to a different tab.
+        # Sessions loosely represent tabs, although a device can be reassigned to a different tab.
         self.active_session = self.get_active_sessions()
         self.initial_tab = self.crt.GetScriptTab()
 
@@ -201,7 +201,7 @@ class Session:
 
     def validate_os(self, os_list, raise_exception=True):
         """
-        Check this session's OS against a list of OS's to verify a script's compatibility.
+        Check this device's OS against a list of OS's to verify a script's compatibility.
         :param os_list: A list of compatible OS's. Valid options: Linux, IOS, XE, NXOS, XR, ASA, WAAS. Case insensitive.
         :param raise_exception: If this flag is True, an exception is raised.
         :return: True bool if OS was found in list, otherwise False
@@ -213,7 +213,7 @@ class Session:
             return False
         if not self.os:
             if raise_exception:
-                raise Exception("Could not find self.os")
+                raise Exception("Could not find self.device_type")
             return False
         if self.os.lower() in [os.lower() for os in os_list]:  # converts os_list to lowercase
             return True
@@ -239,6 +239,42 @@ class Session:
         self.runner = LinuxRunner(self.crt, self.tab)
         self.runner.set_prompt()
 
+    def attempt_login(self, runner):
+        login_waitfors = ["ogin",
+                          "sername",
+                          "assword",
+                          "incorrect",
+                          "#",
+                          ">"]
+        login_timeout = 5
+        runner.current_tab.Screen.Send("\r")
+        result = runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
+        max_attempts = 5
+        count = 1
+        while result < 4:
+            if count > max_attempts:
+                break
+            result = runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
+            time.sleep(1)
+            if result <= 2:
+                runner.current_tab.Screen.Send("{}\r".format(self.username))
+                runner.current_tab.Screen.WaitForString(":", 20)
+                time.sleep(1)
+                runner.current_tab.Screen.Send("{}\r".format(self.password))
+                time.sleep(1)
+            elif result == 3:
+                runner.current_tab.Screen.Send("\r")
+                runner.current_tab.Screen.Send("{}\r".format(self.password))
+                time.sleep(1)
+            elif result >= 5:
+                break
+            elif result == 0:
+                break
+            count += 1
+
+        if result == 4:  # If password is still incorrect after max attempts reached:
+            raise Exception("Failed to login!")
+
     def start_cisco_session(self, attempt_login=True, enable_pass=None, timeout=5):
         """
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
@@ -247,7 +283,7 @@ class Session:
         self.crt.Screen.Synchronous = True
 
         if not self.is_connected():
-            raise Exception("Session is not connected.  Cannot start Cisco session.")
+            raise Exception("Session is not connected.  Cannot start Cisco device.")
 
         if enable_pass:
             self.enable_pass = enable_pass
@@ -257,41 +293,8 @@ class Session:
         # Use this runner until we discover the network OS type
         temp_runner = runners.CiscoRunner(self.crt, self.tab)
 
-        login_waitfors = ["ogin",
-                          "sername",
-                          "assword",
-                          "incorrect",
-                          "#",
-                          ">"]
         if attempt_login:
-            login_timeout = 5
-            temp_runner.current_tab.Screen.Send("\r")
-            result = temp_runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
-            max_attempts = 5
-            count = 1
-            while result < 4:
-                if count > max_attempts:
-                    break
-                result = temp_runner.current_tab.Screen.WaitForStrings(login_waitfors, login_timeout)
-                time.sleep(1)
-                if result <= 2:
-                    temp_runner.current_tab.Screen.Send("{}\r".format(self.username))
-                    temp_runner.current_tab.Screen.WaitForString(":", 20)
-                    time.sleep(1)
-                    temp_runner.current_tab.Screen.Send("{}\r".format(self.password))
-                    time.sleep(1)
-                elif result == 3:
-                    temp_runner.current_tab.Screen.Send("\r")
-                    temp_runner.current_tab.Screen.Send("{}\r".format(self.password))
-                    time.sleep(1)
-                elif result >= 5:
-                    break
-                elif result == 0:
-                    break
-                count += 1
-
-            if result == 4:  # If password is still incorrect after max attempts reached:
-                raise Exception("Failed to login!")
+            self.attempt_login(temp_runner)
 
         # Discover the prompt so we can parse output
         temp_runner.set_prompt()

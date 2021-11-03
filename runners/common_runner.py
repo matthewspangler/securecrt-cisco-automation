@@ -132,7 +132,7 @@ class CommonRunner:
         This function either waits for wait_for or the command itself if no wait_for string is provided.
         This function does not work for sending masked passwords, use crt_send() instead.
         :param command: the command to send to self.current_tab
-        :param wait_for: string to wait for in session output before continuing
+        :param wait_for: string to wait for in device output before continuing
         :return:
         """
         if timeout is None:
