@@ -36,7 +36,10 @@ def main():
 
     int_ranges = nos.crt.Dialog.Prompt("Please write interface ranges separated by spaces "
                                        "(syntax example: 'Gi1/1-4,6 Te1/1-5),"
-                                       "or hit [enter] to run on all interfaces: ").split(" ") or None
+                                       "or hit [enter] to run on all interfaces: ")
+
+    if int_ranges:  # split if ranges were specified
+        int_ranges = int_ranges.split(" ")
 
     input_commands = nos.crt.Dialog.Prompt("Type any additional commands to enter for each interface, "
                                            "separated by commas: ") or None
