@@ -1,6 +1,5 @@
 # $language = "Python3"
 # $interface = "1.0"
-
 from runners.common_runner import CommonRunner
 import re
 

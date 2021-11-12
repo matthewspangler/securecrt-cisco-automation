@@ -8,6 +8,7 @@ import struct
 import re
 import logging
 from ciscoconfparse import CiscoConfParse
+import time
 
 # Logging configuration defined in common_runner.py
 logger = logging.getLogger()
@@ -87,12 +88,13 @@ class CiscoRunner(CommonRunner):
 
         result = ''
         attempts = 0
-        while result == '' and attempts < 3:
+        while result == '' and attempts < 10:
             test_string = "\n!&%\b\b\b"
             self.current_tab.Screen.Send(test_string)
             result = self.current_tab.Screen.ReadString("!&%", self.response_timeout)
             attempts += 1
             logger.debug("<CONNECT> Attempt {0}: Prompt result = {1}".format(attempts, result))
+            #time.sleep(0.1)
 
         prompt = result.strip(u"\r\n\b ")
         if prompt == '':

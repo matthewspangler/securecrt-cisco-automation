@@ -38,9 +38,8 @@ class CommonRunner:
             self.crt.GetScriptTab()
         else:
             self.current_tab = current_tab
-        self.host = current_tab.Caption
         self.current_tab.Screen.Synchronous = True
-        self.response_timeout = 5
+        self.response_timeout = 10
         self.skip_exceptions = True
         # self.current_tab.Screen.IgnoreEscape = True
         self.user_id = os.environ.get('USERNAME')

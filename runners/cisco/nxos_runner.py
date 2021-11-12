@@ -13,8 +13,7 @@ class NXOS(CiscoRunner):
         return '<Class: NXOS>'
 
     def enable_cdp_global(self):
-        if not "(config)" in self.prompt:
-            self.global_config()
+        self.global_config()
         self.send("cdp enable \r")
 
     def enable_cdp_intf(self, interface):

@@ -304,40 +304,48 @@ class Session:
             temp_runner.current_tab.Screen.WaitForString("en", timeout)
             temp_runner.set_prompt()
         while ")#" in temp_runner.prompt:  # exit configuration modes
-            temp_runner.send("exit\r")
+            temp_runner.send("exit \r")
             temp_runner.current_tab.Screen.WaitForString("exit", timeout)
             temp_runner.set_prompt()
 
-        sh_ver_out = temp_runner.get_command_output("sh ver | i Cisco")
-        result = crt_automation.utilities.os_regex(sh_ver_out)
-        if not result:
-            if "IOS" in '\n'.join(sh_ver_out):
-                self.runner = runners.cisco.XE(self.crt, self.tab)
-                self.os = "IOS"
-            else:
-                # TODO - handle ROMMON properly.
+        # Check for ROMMON:
+        if temp_runner.prompt in temp_runner.rommon_prompts:
+            temp_runner.send("help\r")
+            result = temp_runner.send_wait_for_strings("help\r", ["boot", "Invalid"])
+            if result == 0:
+                pass
+            if result == 1:
                 self.runner = runners.cisco.ROMMON(self.crt, self.tab)
                 self.os = "ROMMON"
-        else:
-            if "XE" in result:
+            if result == 2:
+                pass
+        else:  # Not ROMMON
+            os_waitfors = [
+                "IOS",
+                "NX-OS",
+                "XR",
+                "ASA",
+                "WAAS"
+            ]
+            result = temp_runner.send_wait_for_strings("sh ver | i Cisco \r", os_waitfors)
+
+            if result == 0:
+                self.runner = CiscoRunner(self.crt, self.tab)
+                self.os = "UNKNOWN"
+            if result == 1:
                 self.runner = runners.cisco.XE(self.crt, self.tab)
                 self.os = "XE"
-            elif "XR" in result:
-                self.runner = runners.cisco.XR(self.crt, self.tab)
-                self.os = "XR"
-            elif "WAAS" in result:
-                self.runner = runners.cisco.WAAS(self.crt, self.tab)
-                self.os = "WAAS"
-            elif "NX-OS" in result:
+            if result == 2:
                 self.runner = runners.cisco.NXOS(self.crt, self.tab)
                 self.os = "NXOS"
-            elif "ASA" in result:
+            if result == 3:
+                self.runner = runners.cisco.XR(self.crt, self.tab)
+                self.os = "XR"
+            if result == 4:
                 self.runner = runners.cisco.ASA(self.crt, self.tab)
                 self.os = "ASA"
-            else:
-                # if all else fails:
-                self.runner = CommonRunner(self.crt, self.tab)
-                self.os = "Unknown"
-                # TODO: add Linux detection.
+            if result == 5:
+                self.runner = runners.cisco.WAAS(self.crt, self.tab)
+                self.os = "WAAS"
 
-        logging.debug("OS class is {}".format(self.runner.__str__()))
+        logging.info("OS class is {}".format(self.runner.__str__()))
