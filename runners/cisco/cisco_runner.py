@@ -93,26 +93,26 @@ class CiscoRunner(CommonRunner):
             self.current_tab.Screen.Send(test_string)
             result = self.current_tab.Screen.ReadString("!&%", self.response_timeout)
             attempts += 1
-            logger.debug("<CONNECT> Attempt {0}: Prompt result = {1}".format(attempts, result))
+            logger.debug("<set_prompt> Attempt {0}: Prompt result = {1}".format(attempts, result))
             #time.sleep(0.1)
 
         prompt = result.strip(u"\r\n\b ")
         if prompt == '':
             try:
                 screen_row = self.current_tab.Screen.CurrentRow + 0
-                logger.debug("set_prompt(): screenrow = {}".format(screen_row))
+                logger.debug("<set_prompt> screenrow = {}".format(screen_row))
                 read_line = self.current_tab.Screen.Get(screen_row, 1, screen_row, 120)
-                logger.debug("set_prompt(): read_line = {}".format(read_line))
+                logger.debug("<set_prompt> read_line = {}".format(read_line))
                 prompt = re.search(self.prompt_regex, read_line).group(0)
             except AttributeError:
                 prompt = 'UNKNOWN'
-                logger.debug("<GET PROMPT> Prompt discovery failed.  Raising exception.")
+                logger.debug("<set_prompt> Prompt discovery failed.  Raising exception.")
                 raise Exception("Unable to discover device prompt")
 
-        logger.debug("<GET PROMPT> Discovered prompt as '{0}'.".format(prompt))
+        logger.debug("<set_prompt> Discovered prompt as '{0}'.".format(prompt))
 
         self.prompt = prompt
-        logger.debug("self.prompt set to '{}'".format(self.prompt))
+        logger.debug("<set_prompt> prompt set to '{}'".format(self.prompt))
         return prompt
 
     def get_output_as_str(self, command):
@@ -151,7 +151,7 @@ class CiscoRunner(CommonRunner):
         try:
             # Need the 'b' in mode 'wb', or else Windows systems add extra blank lines.
             self.send(command + "\r")
-            logger.info("Command '{}' sent to device/tab.".format(command))
+            logger.info("<get_command_output> Command '{}' sent to device/tab.".format(command))
 
             # Loop to capture every line of the command.  If we get CRLF (first entry in our "endings" list), then
             # write that line to the file.  If we get our prompt back (which won't have CRLF), break the loop b/c we
@@ -160,13 +160,13 @@ class CiscoRunner(CommonRunner):
                 nextline = self.current_tab.Screen.ReadString(line_matches, self.response_timeout)
                 # If the match was the 1st index in the endings list -> \r\n
                 if self.current_tab.Screen.MatchIndex == 0:
-                    logger.debug("MatchIndex is 0. Timeout trying to capture input.")
+                    logger.debug("<get_command_output> MatchIndex is 0. Timeout trying to capture input.")
                     # TODO: debugging/logging if this scope is reached
                     # TODO: gets stuck here on commands that show the next prompt with no output
                     if self.skip_exceptions is False:
                         raise Exception("Timeout trying to capture output")
                 elif self.current_tab.Screen.MatchIndex == 1:
-                    logger.debug("MatchIndex is 1. Successfully found prompt!")
+                    logger.debug("<get_command_output> MatchIndex is 1. Successfully found prompt!")
                     # We got our prompt, so break the loop
                     break
                 elif self.current_tab.Screen.MatchIndex <= 4:
@@ -182,12 +182,12 @@ class CiscoRunner(CommonRunner):
                         # and ignore the character if it can't be done (rare error on
                         # Nexus)
                         output.append(nextline.strip('\r\n'))
-                    logger.debug("MatchIndex is less than or equal to 4. Append newline to output list.")
+                    logger.debug("<get_command_output> MatchIndex is less than or equal to 4. Append newline to output list.")
                 elif self.current_tab.Screen.MatchIndex > 4:
                     # If we get a --More-- send a space character
                     # TODO: make crt API wrapper and replace this send command:
                     self.current_tab.Screen.Send(" ")
-                    logger.debug("MatchIndex is greater than 4. Usually this means we encountered a 'More' prompt.")
+                    logger.debug("<get_command_output> MatchIndex is greater than 4. Usually this means we encountered a 'More' prompt.")
                 else:
                     if self.skip_exceptions is False:
                         raise Exception("Timeout trying to capture output")
@@ -231,9 +231,9 @@ class CiscoRunner(CommonRunner):
                 mode = "Privileged EXEC"
                 mode_prompt = "#"
         self.mode = mode
-        logger.debug("self.mode set to {}".format(mode))
+        logger.debug("<set_mode> self.mode set to {}".format(mode))
         self.mode_prompt = mode_prompt
-        logger.debug("self.mode_prompt set to {}".format(mode_prompt))
+        logger.debug("<set_mode> self.mode_prompt set to {}".format(mode_prompt))
 
     def user_exec(self):
         """

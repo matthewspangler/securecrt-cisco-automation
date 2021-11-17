@@ -139,6 +139,8 @@ class Session:
     def __init__(self, crt, tab):
         self.crt = crt
         self.tab = tab
+        self.screen = tab.Screen
+        self.session = tab.Session
         self.script = None
         self.os = None
         self.host = tab.Caption
@@ -187,7 +189,12 @@ class Session:
             return
 
     def disconnect(self):
-        pass
+        self.screen.Synchronous = False
+        self.screen.IgnoreEscape = False
+        try:
+            self.session.Unlock()
+        except Exception:
+            pass
 
     def is_connected(self):
         """
@@ -280,10 +287,19 @@ class Session:
         Discovers the Cisco OS, sets self.runner to an instance of a runner class, and sets the prompt.
         :return:
         """
-        self.crt.Screen.Synchronous = True
-
         if not self.is_connected():
             raise Exception("Session is not connected.  Cannot start Cisco device.")
+
+        # Lock tab to prevent keystrokes sending data
+        try:
+            self.session.Lock()
+        except Exception:
+            pass
+
+        if not self.screen.Synchronous:
+            self.screen.Synchronous = True
+            # TODO: next line seemed to break scripts on Nexus devices:
+            # self.screen.IgnoreEscape = True
 
         if enable_pass:
             self.enable_pass = enable_pass
@@ -349,3 +365,4 @@ class Session:
                 self.os = "WAAS"
 
         logging.info("OS class is {}".format(self.runner.__str__()))
+
