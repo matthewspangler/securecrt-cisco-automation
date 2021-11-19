@@ -73,6 +73,8 @@ def main():
     nos.set_prompt()
     nos.save_changes()
 
+    scrt.end_sessions()
+
     return
 
 

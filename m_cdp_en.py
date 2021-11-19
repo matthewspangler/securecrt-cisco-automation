@@ -37,13 +37,14 @@ def main():
         nos = session.runner
         nos.priv_exec()
         interfaces = nos.get_intf_names()
-        nos.set_prompt()
         nos.enable_cdp_global()
         for intf in interfaces:
             nos.enable_cdp_intf(intf)
         nos.priv_exec()
         nos.set_prompt()
         nos.save_changes()
+
+    scrt.end_sessions()
 
     return
 

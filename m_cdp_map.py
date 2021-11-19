@@ -51,6 +51,8 @@ def main():
 
     os.startfile(cdp_file)
 
+    scrt.end_sessions()
+
     return
 
 

@@ -20,8 +20,11 @@ class CrtSession:
         self.active_session = self.get_active_sessions()
         self.initial_tab = self.crt.GetScriptTab()
 
-    def cleanup(self):
-        pass
+    def end_sessions(self):
+        for session in self.sessions:
+            session.disconnect()
+        del self.sessions
+        del self.active_session
 
     def get_active_sessions(self):
         # TODO: if sessions list is empty...
@@ -292,7 +295,8 @@ class Session:
 
         # Lock tab to prevent keystrokes sending data
         try:
-            self.session.Lock()
+            #self.session.Lock()
+            pass
         except Exception:
             pass
 

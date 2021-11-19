@@ -406,8 +406,8 @@ class CiscoRunner(CommonRunner):
         mgmt_vrf_list = ["management",
                          "Mgmt-vrf",
                          "Mgmt-intf",
-                         "mgmt",
-                         "mgmtVrf"]
+                         "mgmtVrf",
+                         "mgmt"]
         sh_vrf = '\n'.join(self.get_command_output("sh vrf"))
         if sh_vrf is None:
             return None

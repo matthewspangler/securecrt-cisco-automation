@@ -34,7 +34,7 @@ def main():
     # Make runner easier to type:
     net_os = scrt.active_session.runner
 
-
+    scrt.end_sessions()
 
     return
 
